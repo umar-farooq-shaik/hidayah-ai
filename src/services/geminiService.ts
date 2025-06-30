@@ -52,7 +52,7 @@ export class GeminiService {
     }
 
     try {
-      const model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
+      const model = this.genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
       
       const prompt = `${SYSTEM_PROMPT}\n\nUser Question: ${question}`;
       const result = await model.generateContent(prompt);
