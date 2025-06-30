@@ -46,13 +46,13 @@ export class GeminiService {
     this.genAI = new GoogleGenerativeAI(apiKey);
   }
 
-  async askQuestion(question: string): Promise<GeminiAnswer[]> {
+  async askQuestion(question: string) {
     if (!this.genAI) {
       throw new Error('Gemini API key not provided');
     }
 
     try {
-      const model = this.genAI.getGenerativeModel({ model: 'gemini-pro' });
+      const model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
       
       const prompt = `${SYSTEM_PROMPT}\n\nUser Question: ${question}`;
       const result = await model.generateContent(prompt);
@@ -65,8 +65,8 @@ export class GeminiService {
       try {
         const jsonMatch = text.match(/\[[\s\S]*\]/);
         if (jsonMatch) {
-          const parsedAnswers = JSON.parse(jsonMatch[0]);
-          return parsedAnswers.map((answer: any, index: number) => ({
+          const parsedAnswers: GeminiAnswer[] = JSON.parse(jsonMatch[0]);
+          return parsedAnswers.map((answer, index) => ({
             id: `gemini-${Date.now()}-${index}`,
             ...answer
           }));
