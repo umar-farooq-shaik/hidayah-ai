@@ -2,7 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Layout from '../components/Layout';
-import { Search, Bookmark, ThumbsUp, ThumbsDown, Loader, BookOpen, Quote } from 'lucide-react';
+import ApiKeyInput from '../components/ApiKeyInput';
+import { geminiService } from '../services/geminiService';
+import { Search, Bookmark, ThumbsUp, ThumbsDown, Loader, BookOpen, Quote, AlertCircle } from 'lucide-react';
 
 interface Answer {
   id: string;
@@ -19,36 +21,74 @@ const Ask = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [showSimplified, setShowSimplified] = useState<{ [key: string]: boolean }>({});
+  const [apiKey, setApiKey] = useState('');
+  const [showApiKeyInput, setShowApiKeyInput] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const mockAnswers: Answer[] = [
-    {
-      id: '1',
-      sourceType: 'Quran',
-      arabicText: 'وَمَن يَتَّقِ اللَّهَ يَجْعَل لَّهُ مَخْرَجًا',
-      translation: 'And whoever fears Allah - He will make for him a way out.',
-      reference: 'Surah At-Talaq 65:2',
-      simplified: 'This verse teaches us that those who have taqwa (God-consciousness) will be provided with solutions to their difficulties by Allah.'
-    },
-    {
-      id: '2',
-      sourceType: 'Hadith',
-      arabicText: 'إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ',
-      translation: 'Actions are but by intention.',
-      reference: 'Sahih al-Bukhari 1',
-      simplified: 'The Prophet ﷺ emphasized that the value of our deeds depends on our intentions behind them.'
+  // Check for stored API key on component mount
+  useEffect(() => {
+    const storedApiKey = localStorage.getItem('gemini-api-key');
+    if (storedApiKey) {
+      setApiKey(storedApiKey);
+      geminiService.setApiKey(storedApiKey);
+    } else {
+      setShowApiKeyInput(true);
     }
-  ];
+  }, []);
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!question.trim()) return;
+  // Auto-search if question is provided in URL
+  useEffect(() => {
+    const urlQuestion = searchParams.get('q');
+    if (urlQuestion && apiKey) {
+      setQuestion(urlQuestion);
+      handleSearch(null, urlQuestion);
+    }
+  }, [searchParams, apiKey]);
+
+  const handleApiKeySubmit = (newApiKey: string) => {
+    setApiKey(newApiKey);
+    localStorage.setItem('gemini-api-key', newApiKey);
+    geminiService.setApiKey(newApiKey);
+    setShowApiKeyInput(false);
+    setError(null);
+  };
+
+  const handleSearch = async (e: React.FormEvent | null, searchQuestion?: string) => {
+    if (e) e.preventDefault();
+    const queryQuestion = searchQuestion || question;
+    
+    if (!queryQuestion.trim()) return;
+
+    if (!apiKey) {
+      setShowApiKeyInput(true);
+      return;
+    }
 
     setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
+    setError(null);
+    
+    try {
+      const geminiAnswers = await geminiService.askQuestion(queryQuestion);
+      setAnswers(geminiAnswers);
+    } catch (error) {
+      console.error('Error getting Gemini response:', error);
+      setError('Failed to get response. Please check your API key and try again.');
+      
+      // Show mock data as fallback
+      const mockAnswers: Answer[] = [
+        {
+          id: 'fallback-1',
+          sourceType: 'Quran',
+          arabicText: 'وَمَن يَتَّقِ اللَّهَ يَجْعَل لَّهُ مَخْرَجًا',
+          translation: 'And whoever fears Allah - He will make for him a way out.',
+          reference: 'Surah At-Talaq 65:2',
+          simplified: 'This verse teaches us that those who have taqwa (God-consciousness) will be provided with solutions to their difficulties by Allah.'
+        }
+      ];
       setAnswers(mockAnswers);
+    } finally {
       setIsLoading(false);
-    }, 2000);
+    }
   };
 
   const toggleSimplified = (id: string) => {
@@ -71,6 +111,12 @@ const Ask = () => {
   return (
     <Layout>
       <div className="max-w-4xl mx-auto px-4 py-8">
+        {/* API Key Input */}
+        <ApiKeyInput 
+          onApiKeySubmit={handleApiKeySubmit}
+          isVisible={showApiKeyInput}
+        />
+
         {/* Search Bar */}
         <div className="sticky top-20 z-40 bg-white/95 backdrop-blur-sm py-4 -mx-4 px-4 mb-8">
           <form onSubmit={handleSearch} className="relative">
@@ -94,11 +140,21 @@ const Ask = () => {
           </form>
         </div>
 
+        {/* Error Display */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div className="flex items-center">
+              <AlertCircle className="text-red-600 mr-2" size={20} />
+              <p className="text-red-700">{error}</p>
+            </div>
+          </div>
+        )}
+
         {/* Loading State */}
         {isLoading && (
           <div className="text-center py-12">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-4"></div>
-            <p className="text-gray-600">Searching through Islamic sources...</p>
+            <p className="text-gray-600">Consulting Islamic sources...</p>
           </div>
         )}
 
@@ -123,15 +179,19 @@ const Ask = () => {
                     {answer.sourceType === 'Quran' ? '📖 Quran' : 
                      answer.sourceType === 'Hadith' ? '📕 Hadith' : '📚 Tafsir'}
                   </span>
-                  <span className="text-sm text-gray-500">{answer.reference}</span>
+                  {answer.reference && (
+                    <span className="text-sm text-gray-500">{answer.reference}</span>
+                  )}
                 </div>
 
                 {/* Arabic Text */}
-                <div className="mb-4 p-4 bg-accent/30 rounded-lg">
-                  <p className="arabic-text text-xl md:text-2xl text-slate">
-                    {answer.arabicText}
-                  </p>
-                </div>
+                {answer.arabicText && (
+                  <div className="mb-4 p-4 bg-accent/30 rounded-lg">
+                    <p className="arabic-text text-xl md:text-2xl text-slate">
+                      {answer.arabicText}
+                    </p>
+                  </div>
+                )}
 
                 {/* Translation */}
                 <div className="mb-4">
@@ -190,28 +250,30 @@ const Ask = () => {
               </div>
             ))}
 
-            {/* Related Content */}
-            <div className="mt-12 p-6 bg-gradient-to-r from-accent/50 to-white rounded-xl">
-              <h3 className="font-semibold text-lg mb-4 flex items-center">
-                <BookOpen className="mr-2 text-primary" size={20} />
-                Related Guidance
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-4 bg-white rounded-lg">
-                  <p className="text-sm text-gray-600 mb-2">Quran 2:286</p>
-                  <p className="text-gray-700">"Allah does not burden a soul beyond that it can bear..."</p>
-                </div>
-                <div className="p-4 bg-white rounded-lg">
-                  <p className="text-sm text-gray-600 mb-2">Sahih Muslim 2999</p>
-                  <p className="text-gray-700">"The believer is not one who eats his fill while his neighbor goes hungry."</p>
+            {/* Related Content - only show if we have real answers */}
+            {!error && (
+              <div className="mt-12 p-6 bg-gradient-to-r from-accent/50 to-white rounded-xl">
+                <h3 className="font-semibold text-lg mb-4 flex items-center">
+                  <BookOpen className="mr-2 text-primary" size={20} />
+                  Related Guidance
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-4 bg-white rounded-lg">
+                    <p className="text-sm text-gray-600 mb-2">Quran 2:286</p>
+                    <p className="text-gray-700">"Allah does not burden a soul beyond that it can bear..."</p>
+                  </div>
+                  <div className="p-4 bg-white rounded-lg">
+                    <p className="text-sm text-gray-600 mb-2">Sahih Muslim 2999</p>
+                    <p className="text-gray-700">"The believer is not one who eats his fill while his neighbor goes hungry."</p>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         )}
 
         {/* No Results State */}
-        {!isLoading && answers.length === 0 && question && (
+        {!isLoading && answers.length === 0 && question && !showApiKeyInput && (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">🔍</div>
             <h3 className="text-xl font-semibold text-gray-700 mb-2">Ready to Search</h3>
