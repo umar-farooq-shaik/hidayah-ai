@@ -1,73 +1,84 @@
-# Welcome to your Lovable project
+# 🕌 Hidayah AI
 
-## Project info
+**Your Trusted Islamic Answer Hub**
 
-**URL**: https://lovable.dev/projects/3500a4a8-115e-467d-adaf-83262cad6cdc
+A web platform to ask any Islamic question and get clear, evidence-based answers strictly from the Quran, Sahih Hadith, and authentic classical texts—no opinions, no social media.
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+## ✨ Inspiration
 
-**Use Lovable**
+As practicing Muslims, we saw how often people get confused by contradictory information online about Islamic rulings. Many rely on blogs, forums, or social media without knowing whether the sources are trustworthy. We wanted to build a platform that empowers anyone—scholars, students, or laypeople—to access **verified primary sources** quickly and confidently.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/3500a4a8-115e-467d-adaf-83262cad6cdc) and start prompting.
+---
 
-Changes made via Lovable will be committed automatically to this repo.
+## 💡 What it does
 
-**Use your preferred IDE**
+Hidayah AI allows users to:
+- **Ask any question** about Islam in natural language.
+- Get **direct evidence-based answers** sourced only from:
+  - The Quran (with Arabic text and trusted translations).
+  - Sahih Hadith collections (Bukhari, Muslim).
+  - Selected authentic classical references.
+- See all relevant references with:
+  - Exact citations.
+  - Neutral explanations.
+- Bookmark important answers.
+- Browse in multiple languages.
+- Never see opinions or unverified content.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+---
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## 🛠️ How we built it
 
-Follow these steps:
+- **Frontend:** React for the web interface, styled with TailwindCSS and smooth animations for clarity and accessibility.
+- **Backend:** Node.js + Express API handling query processing.
+- **NLP & Search:** A Python microservice using semantic embeddings (sentence transformers) to match user queries to indexed texts.
+- **Database:**
+  - Elasticsearch for high-quality semantic search.
+  - MongoDB for user profiles, bookmarks, and history.
+- **Sources:**
+  - Quran data from Tanzil project and Sahih International translation.
+  - Sahih Bukhari and Muslim Hadith datasets in verified formats.
+  - Selected tafsir and fiqh references.
+- **Deployment:** Hosted on Render and Vercel for fast global access.
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+---
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+## 🚧 Challenges we ran into
 
-# Step 3: Install the necessary dependencies.
-npm i
+- **Semantic matching:** Ensuring natural-language questions reliably map to the correct verses or hadith, especially with varied phrasing.
+- **Source verification:** Cross-checking datasets to avoid weak or fabricated narrations.
+- **User experience:** Designing an interface that feels modern while respecting Islamic aesthetic values.
+- **Performance:** Optimizing search speed across large text corpora without sacrificing accuracy.
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+---
 
-**Edit a file directly in GitHub**
+## 🏆 Accomplishments that we're proud of
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- Created a **fully working prototype** combining modern NLP with verified Islamic sources.
+- Built an intuitive interface with multilingual support and clean design.
+- Designed a system that avoids any opinion-based content—only pure references.
+- Received positive feedback from early users who appreciated the transparency and reliability.
 
-**Use GitHub Codespaces**
+---
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 🎓 What we learned
 
-## What technologies are used for this project?
+- **Natural Language Understanding** is powerful but requires careful fine-tuning when dealing with religious texts.
+- **Trust and transparency** are critical when building tools that deal with sensitive topics like faith.
+- **User education** is as important as providing answers—many people are not aware of the difference between primary sources and secondary opinions.
 
-This project is built with:
+---
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 🚀 What's next for Hidayah AI
 
-## How can I deploy this project?
+- Add more languages, including Urdu and Bahasa Indonesia.
+- Expand the corpus to include authenticated tafsir collections.
+- Integrate audio recitation of referenced Quran ayahs.
+- Develop a mobile app version for offline access.
+- Collaborate with scholars to enrich explanations while staying strictly evidence-based.
 
-Simply open [Lovable](https://lovable.dev/projects/3500a4a8-115e-467d-adaf-83262cad6cdc) and click on Share -> Publish.
+---
 
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+*Made with ❤️ to help the Ummah access pure, trusted knowledge.*
